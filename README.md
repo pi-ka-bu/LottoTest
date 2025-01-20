@@ -1,6 +1,6 @@
 # Lottery Number Generator
 
-This project is a C# application that generates lottery number combinations. It ensures that the generated combinations do not contain too many consecutive numbers, based on user input. The results can be written to a CSV file.
+This project is a C# application that generates lottery number combinations. It ensures that the generated combinations do not contain too many consecutive numbers, based on user input. The results can be written to a CSV file and displayed on the console.
 
 ## Features
 
@@ -8,7 +8,10 @@ This project is a C# application that generates lottery number combinations. It 
 - Includes a power number from a range of 1 to 7.
 - Allows the user to specify the maximum number of consecutive numbers in a combination.
 - Uses parallel processing to speed up the generation of combinations.
+- Filters out combinations that have already appeared in a downloaded CSV file.
 - Outputs the results to a CSV file.
+- Displays a processing animation while generating combinations.
+- Allows the user to print a specified number of random combinations on the console.
 
 ## Requirements
 
@@ -26,7 +29,9 @@ This project is a C# application that generates lottery number combinations. It 
 
 When you run the application, you will be prompted to enter the maximum number of consecutive numbers to allow in a combination. Enter a number between 2 and 6.
 
-The application will then generate valid lottery combinations and display the first 10 valid results. You will also be prompted to write the results to a CSV file.
+The application will then download a CSV file from the specified URL, process it, and generate valid lottery combinations. You will be prompted to enter the number of random combinations you would like to print on the console. The results will be displayed in a table format with even spaces.
+
+You will also be prompted to write the results to a CSV file.
 
 ### Example
 
