@@ -197,7 +197,7 @@ class LotteryGenerator
                 Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop);
                 counter++;
                 Thread.Sleep(100);
-            }
+            }  
             else
             {
                 counter = 0;
@@ -253,7 +253,7 @@ class LotteryGenerator
         }
 
         // Define the URL and temporary file path
-        string csvUrl = "https://pais.co.il/Lotto/lotto_resultsDownload.aspx";
+        string csvUrl = Configuration.GetValue<string>("DownloadCsv");
         string tempFilePath = Path.GetTempFileName();
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine($"\n\tTemporary file {tempFilePath}, will be deleted in the end.\n");
