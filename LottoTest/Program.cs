@@ -319,7 +319,7 @@ class LotteryGenerator
             {
                 Console.WriteLine("Invalid input! Please enter a number between 1 and the total number of valid combinations.");
             }
-            Console.WriteLine("Would you like to print more?(0 = No)");
+            Console.WriteLine("Would you like to print more?(-1 = No)");
             randomCombination = int.Parse(Console.ReadLine());
         }
         // Define the path to save the CSV file
