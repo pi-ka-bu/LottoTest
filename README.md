@@ -4,8 +4,8 @@ This project is a C# application that generates lottery number combinations. It 
 
 ## Features
 
-- Generates combinations of 6 regular numbers from a range of 1 to 37.
-- Includes a power number from a range of 1 to 7.
+- Generates combinations of regular numbers from a specified range.
+- Includes a power number from a specified range.
 - Allows the user to specify the maximum number of consecutive numbers in a combination.
 - Uses parallel processing to speed up the generation of combinations.
 - Filters out combinations that have already appeared in a downloaded CSV file.
@@ -18,6 +18,11 @@ This project is a C# application that generates lottery number combinations. It 
 - .NET 8.0
 - Visual Studio 2022
 
+## Configuration
+
+The application uses an `appsettings.json` file to configure various settings. Create an `appsettings.json` file in the project directory with the following content:
+
+
 ## Usage
 
 1. Clone the repository or download the source code.
@@ -27,7 +32,7 @@ This project is a C# application that generates lottery number combinations. It 
 
 ### Running the Application
 
-When you run the application, you will be prompted to enter the maximum number of consecutive numbers to allow in a combination. Enter a number between 2 and 6.
+When you run the application, you will be prompted to enter the maximum number of consecutive numbers to allow in a combination. Enter a number between 2 and the value specified in `RegularCombinations` in the `appsettings.json` file.
 
 The application will then download a CSV file from the specified URL, process it, and generate valid lottery combinations. You will be prompted to enter the number of random combinations you would like to print on the console. The results will be displayed in a table format with even spaces.
 
@@ -36,19 +41,22 @@ You will also be prompted to write the results to a CSV file.
 ### Example
 
 ```
-Enter the maximum number of consecutive numbers to allow (between 2 and 6): 3
+Enter the maximum number of consecutive numbers to allow (between 2 and 6): 3 
+Temporary file C:\Users\Username\AppData\Local\Temp\tmp1234.tmp, will be deleted in the end. 
 Total number of valid combinations: 123456
-First 10 valid combinations (allowing up to 2 consecutive numbers):
+How many random combinations would you like to print on screen? 5
+Randomly selected 5 combinations:
 1'st | 2'nd | 3'rd | 4'th | 5'th | 6'th | Power Number
-1      2      3      4      5      6  |   1
-1      2      3      4      5      6  |   2
-... Write to file?(Y/N - Will end program): Y 
+1    |  2   |  3   |  4   |  5   |  6   |  1 7    |  8   |  9   | 10   | 11   | 12   |  2 ... 
+Would you like to print more?(-1 = No) -1
+Write to file?(Y/N - Will end program): Y 
 Results have been written to: LotteryResults.csv
 ```
 
 ## Project Structure
 
-- `Program.cs`: Contains the main logic for generating lottery combinations, checking for consecutive numbers, and writing results to a CSV file.
+- `Program.cs`: Contains the main logic for generating lottery combinations, checking for consecutive numbers, downloading and processing the CSV file, and writing results to a CSV file.
+- `appsettings.json`: Configuration file for the application settings.
 
 ## Contributing
 
