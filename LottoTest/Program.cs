@@ -9,10 +9,6 @@ using Microsoft.Extensions.Configuration;
 
 class LotteryGenerator
 {
-    // Define the range of regular numbers and power numbers
-    //static int[] regularNumbers = Enumerable.Range(1, 37).ToArray();  // Numbers from 1 to 37
-    //static int[] powerNumbers = Enumerable.Range(1, 7).ToArray();      // Numbers from 1 to 7
-
     // Check if a combination contains too many consecutive numbers (maxConsecutive or more consecutive numbers)
     static bool HasTooManyConsecutiveNumbers(int[] regularComb, int maxConsecutive)
     {
@@ -92,9 +88,11 @@ class LotteryGenerator
         }
         return results;
     }
+
+    // Function to generate lottery results using parallel processing
     static async Task<List<(int[], int)>> GenerateLotteryResults(int maxConsecutive, List<(int[], int)> downloadedResults, int[] regularNumbers, int[] powerNumbers, int _regularCombinations, int numThreads = 8)
     {
-        // Generate all combinations of 6 regular numbers out of 37
+        // Generate all combinations of 'regularCombinations' regular numbers out of 'regularNumbers'
         var regularCombinations = GetCombinations(regularNumbers, _regularCombinations).ToArray();
 
         // Split the combinations into chunks for parallel processing
@@ -141,7 +139,7 @@ class LotteryGenerator
     }
 
     // Function to download and process CSV file from the given URL
-    static async Task<List<(int[], int)>> DownloadAndProcessCsv(string url, string tempFilePath,int _regularCombinations)
+    static async Task<List<(int[], int)>> DownloadAndProcessCsv(string url, string tempFilePath, int _regularCombinations)
     {
         using (HttpClient client = new HttpClient())
         {
@@ -197,7 +195,7 @@ class LotteryGenerator
                 Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop);
                 counter++;
                 Thread.Sleep(100);
-            }  
+            }
             else
             {
                 counter = 0;
@@ -210,7 +208,7 @@ class LotteryGenerator
         Console.WriteLine("\n\n");
     }
 
-    //Print logo
+    // Function to print the logo
     static void PrintLogo()
     {
         Console.ForegroundColor = ConsoleColor.Magenta;
@@ -240,19 +238,19 @@ class LotteryGenerator
             .Build();
 
         int regularCombinations = Configuration.GetValue<int>("Lotto:RegularCombinations");
-        int[] regularNumbers = Enumerable.Range(1, Configuration.GetValue<int>("Lotto:MaxNumber")).ToArray();  // Numbers from 1 to 37
-        int[] powerNumbers = Enumerable.Range(1, Configuration.GetValue<int>("Lotto:PowerNumbers")).ToArray();      // Numbers from 1 to 7
+        int[] regularNumbers = Enumerable.Range(1, Configuration.GetValue<int>("Lotto:MaxNumber")).ToArray();  // Numbers from 1 to MaxNumber
+        int[] powerNumbers = Enumerable.Range(1, Configuration.GetValue<int>("Lotto:PowerNumbers")).ToArray(); // Numbers from 1 to PowerNumbers
 
         var defColor = ConsoleColor.White;
         Console.ForegroundColor = defColor;
 
         // Get user input for the maximum length of consecutive numbers to allow
-        Console.Write("Enter the maximum number of consecutive numbers to allow (between 2 and 6): ");3
+        Console.Write("Enter the maximum number of consecutive numbers to allow (between 2 and 6): ");
         int maxConsecutive = int.Parse(Console.ReadLine());
 
         if (maxConsecutive < 2 || maxConsecutive > regularCombinations)
         {
-            Console.WriteLine("Invalid input! Please enter a number between 2 and 6.");
+            Console.WriteLine($"Invalid input! Please enter a number between 2 and {regularCombinations}.");
             return;
         }
 
@@ -262,7 +260,6 @@ class LotteryGenerator
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine($"\n\tTemporary file {tempFilePath}, will be deleted in the end.\n");
 
-
         // Create a cancellation token source for the processing animation
         var cts = new CancellationTokenSource();
 
@@ -271,12 +268,10 @@ class LotteryGenerator
         animationThread.Start();
 
         // Download and process the CSV file
-
         var downloadedResults = await DownloadAndProcessCsv(csvUrl, tempFilePath, regularCombinations);
 
-
         // Generate valid lottery results
-        var lotteryResults = await GenerateLotteryResults(maxConsecutive, downloadedResults, regularNumbers, powerNumbers,8);
+        var lotteryResults = await GenerateLotteryResults(maxConsecutive, downloadedResults, regularNumbers, powerNumbers, regularCombinations);
 
         // Stop the processing animation
         cts.Cancel();
@@ -286,7 +281,7 @@ class LotteryGenerator
         File.Delete(tempFilePath);
         Console.ForegroundColor = defColor;
 
-        // Debugging: Print the number of valid results
+        // Print the number of valid results
         Console.WriteLine($"Total number of valid combinations: {lotteryResults.Count}\n");
 
         // Example: Print the first 10 valid results (just for testing)
@@ -326,6 +321,7 @@ class LotteryGenerator
             Console.WriteLine("Would you like to print more?(-1 = No)");
             randomCombination = int.Parse(Console.ReadLine());
         }
+
         // Define the path to save the CSV file
         string filePath = "LotteryResults.csv";
 
@@ -336,7 +332,6 @@ class LotteryGenerator
         {
             await WriteResultsToCsv(lotteryResults, filePath);
         }
-
 
         Console.WriteLine($"Results have been written to: {filePath}");
     }
