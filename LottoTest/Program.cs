@@ -10,8 +10,8 @@ using Microsoft.Extensions.Configuration;
 class LotteryGenerator
 {
     // Define the range of regular numbers and power numbers
-    static int[] regularNumbers = Enumerable.Range(1, 37).ToArray();  // Numbers from 1 to 37
-    static int[] powerNumbers = Enumerable.Range(1, 7).ToArray();      // Numbers from 1 to 7
+    //static int[] regularNumbers = Enumerable.Range(1, 37).ToArray();  // Numbers from 1 to 37
+    //static int[] powerNumbers = Enumerable.Range(1, 7).ToArray();      // Numbers from 1 to 7
 
     // Check if a combination contains too many consecutive numbers (maxConsecutive or more consecutive numbers)
     static bool HasTooManyConsecutiveNumbers(int[] regularComb, int maxConsecutive)
@@ -72,7 +72,7 @@ class LotteryGenerator
     }
 
     // Helper function to generate valid lottery results from a chunk of regular combinations
-    static List<(int[], int)> GenerateLotteryResultsChunk(int[][] regularCombinationsChunk, int maxConsecutive, List<(int[], int)> downloadedResults)
+    static List<(int[], int)> GenerateLotteryResultsChunk(int[][] regularCombinationsChunk, int maxConsecutive, List<(int[], int)> downloadedResults, int[] regularNumbers, int[] powerNumbers)
     {
         List<(int[], int)> results = new List<(int[], int)>();
         foreach (var regularComb in regularCombinationsChunk)
@@ -92,10 +92,10 @@ class LotteryGenerator
         }
         return results;
     }
-    static async Task<List<(int[], int)>> GenerateLotteryResults(int maxConsecutive, List<(int[], int)> downloadedResults, int numThreads = 8)
+    static async Task<List<(int[], int)>> GenerateLotteryResults(int maxConsecutive, List<(int[], int)> downloadedResults, int[] regularNumbers, int[] powerNumbers, int _regularCombinations, int numThreads = 8)
     {
         // Generate all combinations of 6 regular numbers out of 37
-        var regularCombinations = GetCombinations(regularNumbers, 6).ToArray();
+        var regularCombinations = GetCombinations(regularNumbers, _regularCombinations).ToArray();
 
         // Split the combinations into chunks for parallel processing
         int chunkSize = regularCombinations.Length / numThreads;
@@ -106,7 +106,7 @@ class LotteryGenerator
             chunks.Add(regularCombinations.Skip(i * chunkSize).Take(chunkSize).ToArray());
         }
 
-        var tasks = chunks.Select(chunk => Task.Run(() => GenerateLotteryResultsChunk(chunk, maxConsecutive, downloadedResults))).ToArray();
+        var tasks = chunks.Select(chunk => Task.Run(() => GenerateLotteryResultsChunk(chunk, maxConsecutive, downloadedResults, regularNumbers, powerNumbers))).ToArray();
 
         // Await all tasks and combine the results
         var results = await Task.WhenAll(tasks);
@@ -141,7 +141,7 @@ class LotteryGenerator
     }
 
     // Function to download and process CSV file from the given URL
-    static async Task<List<(int[], int)>> DownloadAndProcessCsv(string url, string tempFilePath)
+    static async Task<List<(int[], int)>> DownloadAndProcessCsv(string url, string tempFilePath,int _regularCombinations)
     {
         using (HttpClient client = new HttpClient())
         {
@@ -161,8 +161,8 @@ class LotteryGenerator
                 var columns = line.Split(',');
 
                 // Parse the regular numbers and power number
-                var regularNumbers = new int[6];
-                for (int i = 0; i < 6; i++)
+                var regularNumbers = new int[_regularCombinations];
+                for (int i = 0; i < _regularCombinations; i++)
                 {
                     regularNumbers[i] = int.Parse(columns[i + 2]);
                 }
@@ -239,14 +239,18 @@ class LotteryGenerator
             .AddCommandLine(args)
             .Build();
 
+        int regularCombinations = Configuration.GetValue<int>("Lotto:RegularCombinations");
+        int[] regularNumbers = Enumerable.Range(1, Configuration.GetValue<int>("Lotto:MaxNumber")).ToArray();  // Numbers from 1 to 37
+        int[] powerNumbers = Enumerable.Range(1, Configuration.GetValue<int>("Lotto:PowerNumbers")).ToArray();      // Numbers from 1 to 7
+
         var defColor = ConsoleColor.White;
         Console.ForegroundColor = defColor;
 
         // Get user input for the maximum length of consecutive numbers to allow
-        Console.Write("Enter the maximum number of consecutive numbers to allow (between 2 and 6): ");
+        Console.Write("Enter the maximum number of consecutive numbers to allow (between 2 and 6): ");3
         int maxConsecutive = int.Parse(Console.ReadLine());
 
-        if (maxConsecutive < 2 || maxConsecutive > 6)
+        if (maxConsecutive < 2 || maxConsecutive > regularCombinations)
         {
             Console.WriteLine("Invalid input! Please enter a number between 2 and 6.");
             return;
@@ -268,11 +272,11 @@ class LotteryGenerator
 
         // Download and process the CSV file
 
-        var downloadedResults = await DownloadAndProcessCsv(csvUrl, tempFilePath);
+        var downloadedResults = await DownloadAndProcessCsv(csvUrl, tempFilePath, regularCombinations);
 
 
         // Generate valid lottery results
-        var lotteryResults = await GenerateLotteryResults(maxConsecutive, downloadedResults);
+        var lotteryResults = await GenerateLotteryResults(maxConsecutive, downloadedResults, regularNumbers, powerNumbers,8);
 
         // Stop the processing animation
         cts.Cancel();
